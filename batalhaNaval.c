@@ -1,63 +1,83 @@
 #include <stdio.h>
 
-// Tamanho do tabuleiro fixo (10x10)
-int TAMANHO = 10;
-// Tamanho fixo dos navios (3 posições)
-int TAMANHO_NAVIO = 3;
-
 // Função para inicializar o tabuleiro com água (0)
-void inicializarTabuleiro(int tabuleiro[10][10]) {
-    for (int i = 0; i < TAMANHO; i++) {
-        for (int j = 0; j < TAMANHO; j++) {
-            tabuleiro[i][j] = 0;
+void inicializarTabuleiro(int linhas, int colunas, int tabuleiro[linhas][colunas]) {
+    for (int i = 0; i < linhas; i++) {
+        for (int j = 0; j < colunas; j++) {
+            tabuleiro[i][j] = 0;  // 0 representa água
         }
     }
 }
 
-// Função para exibir o tabuleiro com as coordenadas em letras para as colunas
-void exibirTabuleiro(int tabuleiro[10][10]) {
-    printf("    ");  // Espaço inicial para as coordenadas das linhas
-    for (int j = 0; j < TAMANHO; j++) {
-        printf("%2c ", 'A' + j);  // Exibe as coordenadas das colunas (letras de A a J)
+// Função para exibir o tabuleiro no console
+void exibirTabuleiro(int linhas, int colunas, int tabuleiro[linhas][colunas]) {
+    printf("    ");
+    for (int j = 0; j < colunas; j++) {
+        printf(" %c ", 'A' + j);
     }
     printf("\n");
 
-    for (int i = 0; i < TAMANHO; i++) {
-        printf("%2d ", i);  // Exibe a coordenada da linha (números de 0 a 9)
-        for (int j = 0; j < TAMANHO; j++) {
-            printf("%2d ", tabuleiro[i][j]);  // Exibe o valor da célula
+    for (int i = 0; i < linhas; i++) {
+        printf("%2d ", i);
+        for (int j = 0; j < colunas; j++) {
+            if (tabuleiro[i][j] == 3) {
+                printf(" N ");
+            } else {
+                printf(" ~ ");
+            }
         }
         printf("\n");
     }
 }
 
-// Função para posicionar os navios (um horizontal e outro vertical)
-void posicionarNavios(int tabuleiro[10][10]) {
-    // Navio Horizontal
-    int linhaH = 2, colunaH = 2;
-    for (int i = 0; i < TAMANHO_NAVIO; i++) {
-        tabuleiro[linhaH][colunaH + i] = 3;
-    }
+// Verifica se um navio pode ser posicionado
+int podePosicionar(int linhas, int colunas, int tamanhoNavio, int tabuleiro[linhas][colunas], int linha, int coluna, int deltaLinha, int deltaColuna) {
+    for (int i = 0; i < tamanhoNavio; i++) {
+        int novaLinha = linha + i * deltaLinha;
+        int novaColuna = coluna + i * deltaColuna;
 
-    // Navio Vertical
-    int linhaV = 5, colunaV = 5;
-    for (int i = 0; i < TAMANHO_NAVIO; i++) {
-        tabuleiro[linhaV + i][colunaV] = 3;
+        if (novaLinha < 0 || novaLinha >= linhas || novaColuna < 0 || novaColuna >= colunas)
+            return 0;
+        if (tabuleiro[novaLinha][novaColuna] == 3)
+            return 0;
+    }
+    return 1;
+}
+
+// Posiciona um navio após validar
+void posicionarNavio(int tamanhoNavio, int tabuleiro[10][10], int linha, int coluna, int deltaLinha, int deltaColuna) {
+    for (int i = 0; i < tamanhoNavio; i++) {
+        int novaLinha = linha + i * deltaLinha;
+        int novaColuna = coluna + i * deltaColuna;
+        tabuleiro[novaLinha][novaColuna] = 3;  // 3 representa navio
     }
 }
 
 int main() {
-    // Declaração da matriz do tabuleiro
+    int linhas = 10, colunas = 10;
+    int tamanhoNavio = 3;
     int tabuleiro[10][10];
 
-    // Inicializa o tabuleiro com água
-    inicializarTabuleiro(tabuleiro);
+    inicializarTabuleiro(linhas, colunas, tabuleiro);
 
-    // Posiciona os navios no tabuleiro
-    posicionarNavios(tabuleiro);
+    // Navio horizontal
+    if (podePosicionar(linhas, colunas, tamanhoNavio, tabuleiro, 1, 1, 0, 1))
+        posicionarNavio(tamanhoNavio, tabuleiro, 1, 1, 0, 1);
 
-    // Exibe o tabuleiro final
-    exibirTabuleiro(tabuleiro);
+    // Navio vertical
+    if (podePosicionar(linhas, colunas, tamanhoNavio, tabuleiro, 4, 7, 1, 0))
+        posicionarNavio(tamanhoNavio, tabuleiro, 4, 7, 1, 0);
+
+    // Navio diagonal principal (\)
+    if (podePosicionar(linhas, colunas, tamanhoNavio, tabuleiro, 6, 0, 1, 1))
+        posicionarNavio(tamanhoNavio, tabuleiro, 6, 0, 1, 1);
+
+    // Navio diagonal secundária (/)
+    if (podePosicionar(linhas, colunas, tamanhoNavio, tabuleiro, 3, 6, 1, -1))
+        posicionarNavio(tamanhoNavio, tabuleiro, 3, 6, 1, -1);
+
+    exibirTabuleiro(linhas, colunas, tabuleiro);
 
     return 0;
 }
+
